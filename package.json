@@ -7,9 +7,8 @@
   },
   "main": "wemo",
   "dependencies": {
-    "ssdp": "*"
   },
   "readmeFilename": "README.md",
   "_id": "wemo@0.0.1",
-  "description": "WeMo client",
+  "description": "WeMo client"
 }
