@@ -41,7 +41,7 @@ WeMo.prototype = {
 			});
 		});
 		req.on('error', function(e) {
-			console.log('problem with request: ' + e.message);
+			callback(e, null);
 		});
 		req.write(data);
 		req.end();
