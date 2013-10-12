@@ -13,16 +13,18 @@ Belkin 社の WeMo を操作する Node.js 用モジュールです。
 --------------
 以下のように getBinaryState/setBinaryState で WeMo が操作出来ます。
 
-	var WeMo = new require('wemo')
-	var wemoSwitch = new WeMo('192.168.0.16');
-	wemoSwitch.setBinaryState(1, function(err, result) { // switch on
+```javascript
+var WeMo = new require('wemo')
+var wemoSwitch = new WeMo('192.168.0.16');
+wemoSwitch.setBinaryState(1, function(err, result) { // switch on
+	if (err) console.error(err);
+	console.log(result); // 1
+	wemoSwitch.getBinaryState(function(err, result) {
 		if (err) console.error(err);
 		console.log(result); // 1
-		wemoSwitch.getBinaryState(function(err, result) {
-			if (err) console.error(err);
-			console.log(result); // 1
-		});
 	});
+});
+```
 
 使用例は test.js をご覧ください。
 
