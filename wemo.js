@@ -1,8 +1,9 @@
 var http = require('http');
 var EventEmitter = require('events').EventEmitter;
 
-var WeMo = function(ip) {
-	this.ip = ip;
+var WeMo = function(ip, port) {
+	this.ip   = ip;
+	this.port = port || 49154;
 };
 
 WeMo.prototype = {
@@ -16,7 +17,7 @@ WeMo.prototype = {
 			'</s:Envelope>\n';
 		var options = {
 			host   : this.ip,
-			port   : 49153,
+			port   : this.port,
 			path   : '/upnp/control/basicevent1',
 			method : 'POST',
 			headers: {

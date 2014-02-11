@@ -26,11 +26,22 @@ wemoSwitch.setBinaryState(1, function(err, result) { // switch on
 });
 ```
 
+ポートが変更されている場合は以下のように第２引数をセットします（デフォルトは ```49154```）。
+
+```javascript
+var wemoSwitch = new WeMo('192.168.0.16', 49153);
+```
+
 使用例は test.js をご覧ください。
 
 その他
 --------------
-WeMo の IP は付属の wemo_search.js を実行することで調べることができます。
+WeMo の IP / ポートは付属の wemo_search.js を実行することで調べることができます。
+
+```sh
+$ npm install node-ssdp
+$ node wemo_search
+```
 
 詳細
 --------------
