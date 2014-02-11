@@ -1,6 +1,6 @@
 {
   "name": "wemo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "hecomi",
     "email": "info@hecomi.com"
@@ -9,6 +9,6 @@
   "dependencies": {
   },
   "readmeFilename": "README.md",
-  "_id": "wemo@0.0.1",
+  "_id": "wemo@0.0.2",
   "description": "WeMo client"
 }
