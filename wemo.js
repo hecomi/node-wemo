@@ -41,6 +41,13 @@ WeMo.prototype = {
 				}
 			});
 		});
+		req.on('socket', function(socket) {
+			socket.setTimeout(WeMo.timeout);
+			socket.on('timeout', function() {
+				req.abort();
+				callback('Timeout access to WeMo@' + options.host + ':' + options.port, null);
+			});
+		});
 		req.on('error', function(e) {
 			callback(e, null);
 		});
