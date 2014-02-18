@@ -39,7 +39,6 @@ var wemoSwitch = new WeMo('192.168.0.16', 49153);
 WeMo の IP / ポートは付属の wemo_search.js を実行することで調べることができます。
 
 ```sh
-$ npm install node-ssdp
 $ node wemo_search
 ```
 
