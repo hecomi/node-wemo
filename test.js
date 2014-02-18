@@ -1,5 +1,12 @@
 var WeMo = require('./wemo.js');
 
+// Search by Friendly Name
+WeMo.searchByFriendlyName('Hecomi WeMo Switch 1', function(err, info) {
+	if (err) throw err;
+	console.log(info);
+});
+
+// Work Switch with Motion
 var wemoSwitch = new WeMo('192.168.0.16');
 wemoSwitch.setBinaryState(0, function(err, result) {
 	if (err) console.error(err);
