@@ -1,15 +1,17 @@
 {
   "name": "wemo",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": {
     "name": "hecomi",
     "email": "info@hecomi.com"
   },
   "main": "wemo",
   "dependencies": {
-	"node-ssdp": "*"
+	"node-ssdp": "*",
+	"request": "*",
+	"xml2js": "*"
   },
   "readmeFilename": "README.md",
-  "_id": "wemo@0.0.5",
+  "_id": "wemo@0.0.6",
   "description": "WeMo client"
 }

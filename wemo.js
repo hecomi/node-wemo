@@ -1,40 +1,61 @@
-var http = require('http');
-var EventEmitter = require('events').EventEmitter;
-var SSDP = require('node-ssdp');
+var http        = require('http');
+var SSDP        = require('node-ssdp');
+var request     = require('request');
+var parseString = require('xml2js').parseString;
 
 var WeMo = function(ip, port) {
 	this.ip   = ip;
 	this.port = port || 49154;
 };
 
-WeMo.searchByFriendlyName = function(name, callback) {
+WeMo.SearchTimeout = 3000; /* msec */
+WeMo.ST = 'urn:Belkin:service:basicevent:1';
+
+WeMo.Search = function(friendlyName, callback) {
+	if (typeof(friendlyName) === 'string') {
+		WeMo.SearchByFriendlyName(friendlyName, callback);
+		return;
+	}
 	var client = new SSDP();
-	var timer = setTimeout(function() {
-		client.sock.unref();
-		var e = new Error('WeMo.searchByFriendlyName was timeout');
-		e.name = 'WeMoSearchTimeoutError';
-		callback(e, null);
-	}, 3000);
 	client.on('response', function (msg, rinfo) {
-		if (msg.match('Belkin')) {
-			var url = msg.match(/LOCATION: (.*?\.xml)/)[1];
-			if (url !== undefined) {
-				http.get(url, function(res) {
-					var xml = '';
-					res.on('data', function(chunk) { xml += chunk.toString(); });
-					res.on('end',  function() {
-						if (xml.match(/<friendlyName>(.*?)<\/friendlyName>/)[1] === name) {
-							var info = url.match(/https?:\/\/([0-9.]*?):([0-9]+?)\//);
-							callback(null, {ip: info[1], port: info[2]});
-							clearTimeout(timer);
-							client.sock.unref();
-						}
-					});
+		msg = msg.split('\r\n').reduceRight(function(map, item) {
+			var data = item.match(/^(.*?): (.*?)$/);
+			if (data) map[data[1]] = data[2];
+			return map;
+		}, {});
+		if (msg.ST === WeMo.ST) {
+			var location = require('url').parse(msg.LOCATION);
+			request.get(location.href, function(err, res, xml) {
+				parseString(xml, function(err, json) {
+					var device = { ip: location.hostname, port: location.port };
+					for (var key in json.root.device[0]) {
+						device[key] = json.root.device[0][key][0];
+					}
+					client.emit('found', device);
 				});
-			}
+			});
 		}
 	});
-	client.search('urn:Belkin:service:basicevent:1');
+	client.search(WeMo.ST);
+	client.exit = function() {
+		client.sock.unref();
+	};
+	return client;
+};
+
+WeMo.SearchByFriendlyName = function(name, callback) {
+	var client = WeMo.Search();
+	var timer = setTimeout(function() {
+		client.exit();
+		callback('WeMoSearchTimeoutError', null);
+	}, WeMo.SearchTimeout);
+	client.on('found', function(device) {
+		if (device.friendlyName === name) {
+			clearTimeout(timer);
+			client.exit();
+			callback(null, device);
+		}
+	});
 };
 
 WeMo.prototype = {
