@@ -1,7 +1,8 @@
-var http        = require('http');
-var SSDP        = require('node-ssdp');
-var request     = require('request');
-var parseString = require('xml2js').parseString;
+var http    = require('http');
+var SSDP    = require('node-ssdp');
+var request = require('request');
+var url     = require('url');
+var xml2js  = require('xml2js');
 
 var WeMo = function(ip, port) {
 	this.ip   = ip;
@@ -18,15 +19,15 @@ WeMo.Search = function(friendlyName, callback) {
 	}
 	var client = new SSDP();
 	client.on('response', function (msg, rinfo) {
-		msg = msg.split('\r\n').reduceRight(function(map, item) {
+		msg = msg.split('\r\n').reduce(function(map, item) {
 			var data = item.match(/^(.*?): (.*?)$/);
 			if (data) map[data[1]] = data[2];
 			return map;
 		}, {});
 		if (msg.ST === WeMo.ST) {
-			var location = require('url').parse(msg.LOCATION);
+			var location = url.parse(msg.LOCATION);
 			request.get(location.href, function(err, res, xml) {
-				parseString(xml, function(err, json) {
+				xml2js.parseString(xml, function(err, json) {
 					var device = { ip: location.hostname, port: location.port };
 					for (var key in json.root.device[0]) {
 						device[key] = json.root.device[0][key][0];
@@ -64,7 +65,7 @@ WeMo.prototype = {
 			'<?xml version="1.0" encoding="utf-8"?>\n' +
 			'<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">\n' +
 			' <s:Body>\n' +
-			param +
+			    param +
 			' </s:Body>\n' +
 			'</s:Envelope>\n';
 		var options = {
