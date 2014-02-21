@@ -38,25 +38,27 @@ WeMo.Search = function(friendlyName, callback) {
 		}
 	});
 	client.search(WeMo.ST);
-	client.exit = function() {
-		client.sock.unref();
-	};
 	return client;
 };
 
 WeMo.SearchByFriendlyName = function(name, callback) {
 	var client = WeMo.Search();
+	client.exit = function() {
+		client.stop();
+		client.stop = function() {};
+	};
 	var timer = setTimeout(function() {
-		client.exit();
 		callback('WeMoSearchTimeoutError', null);
+		client.exit();
 	}, WeMo.SearchTimeout);
 	client.on('found', function(device) {
 		if (device.friendlyName === name) {
 			clearTimeout(timer);
-			client.exit();
 			callback(null, device);
+			client.exit();
 		}
 	});
+	return client;
 };
 
 WeMo.prototype = {
