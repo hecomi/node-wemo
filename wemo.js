@@ -9,15 +9,20 @@ var WeMo = function(ip, port) {
 	this.port = port || 49154;
 };
 
-WeMo.SearchTimeout = 3000; /* msec */
+WeMo.SearchTimeout = 5000; /* msec */
 WeMo.ST = 'urn:Belkin:service:basicevent:1';
 
 WeMo.Search = function(friendlyName, callback) {
-	if (typeof(friendlyName) === 'string') {
-		WeMo.SearchByFriendlyName(friendlyName, callback);
-		return;
+	if (friendlyName !== undefined) {
+		return WeMo.SearchByFriendlyName(friendlyName, callback);
 	}
+
 	var client = new SSDP();
+	// MEMO: Remove process.exit listener registerd in SSDP constructor
+	var processExitListeners = process.listeners('exit');
+	process.removeListener('exit', processExitListeners[processExitListeners.length - 1]);
+
+	client.setMaxListeners(0);
 	client.on('response', function (msg, rinfo) {
 		msg = msg.split('\r\n').reduce(function(map, item) {
 			var data = item.match(/^(.*?): (.*?)$/);
@@ -51,7 +56,7 @@ WeMo.SearchByFriendlyName = function(name, callback) {
 		callback('WeMoSearchTimeoutError', null);
 		client.exit();
 	}, WeMo.SearchTimeout);
-	client.on('found', function(device) {
+	client.once('found', function(device) {
 		if (device.friendlyName === name) {
 			clearTimeout(timer);
 			callback(null, device);
