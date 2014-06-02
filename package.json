@@ -7,7 +7,7 @@
   },
   "main": "wemo",
   "dependencies": {
-	"node-ssdp": "*",
+	"node-ssdp": "0.2.1",
 	"request": "*",
 	"xml2js": "*"
   },
