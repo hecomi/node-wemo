@@ -1,5 +1,5 @@
 var http    = require('http');
-var SSDP    = require('node-ssdp');
+var Client  = require('node-ssdp').Client;
 var request = require('request');
 var url     = require('url');
 var xml2js  = require('xml2js');
@@ -17,20 +17,10 @@ WeMo.Search = function(friendlyName, callback) {
 		return WeMo.SearchByFriendlyName(friendlyName, callback);
 	}
 
-	var client = new SSDP();
-	// MEMO: Remove process.exit listener registerd in SSDP constructor
-	var processExitListeners = process.listeners('exit');
-	process.removeListener('exit', processExitListeners[processExitListeners.length - 1]);
-
-	client.setMaxListeners(0);
-	client.on('response', function (msg, rinfo) {
-		msg = msg.split('\r\n').reduce(function(map, item) {
-			var data = item.match(/^(.*?): (.*?)$/);
-			if (data) map[data[1]] = data[2];
-			return map;
-		}, {});
-		if (msg.ST === WeMo.ST) {
-			var location = url.parse(msg.LOCATION);
+	var client = new Client();
+	client.on('response', function(headers, statusCode, rinfo) {
+		if (headers.ST === WeMo.ST) {
+			var location = url.parse(headers.LOCATION);
 			request.get(location.href, function(err, res, xml) {
 				xml2js.parseString(xml, function(err, json) {
 					var device = { ip: location.hostname, port: location.port };
@@ -48,19 +38,15 @@ WeMo.Search = function(friendlyName, callback) {
 
 WeMo.SearchByFriendlyName = function(name, callback) {
 	var client = WeMo.Search();
-	client.exit = function() {
-		client.stop();
-		client.stop = function() {};
-	};
 	var timer = setTimeout(function() {
 		callback('WeMoSearchTimeoutError', null);
-		client.exit();
+		client._stop();
 	}, WeMo.SearchTimeout);
-	client.once('found', function(device) {
+	client.on('found', function(device) {
 		if (device.friendlyName === name) {
 			clearTimeout(timer);
 			callback(null, device);
-			client.exit();
+			client._stop();
 		}
 	});
 	return client;
