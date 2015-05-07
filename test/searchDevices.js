@@ -5,6 +5,6 @@ var client = WeMo.Search();
 client.on('found', function(device) {
 	console.log(device);
 	setTimeout(function() {
-		client.stop();
+		client._stop();
 	}, 3000);
 });

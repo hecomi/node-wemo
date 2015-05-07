@@ -1,6 +1,7 @@
 var WeMo = require('../wemo');
 
-WeMo.Search('Hecomi WeMo Switch 1', function(err, device) {
+WeMo.Search('WeMo Switch 1', function(err, device) {
+	if (err) throw err;
 	var wemoSwitch = new WeMo(device.ip, device.port);
 	wemoSwitch.setBinaryState(0, function(err, result) {
 		if (err) console.error(err);
