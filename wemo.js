@@ -9,6 +9,7 @@ var WeMo = function(ip, port) {
 	this.port = port || 49154;
 };
 
+WeMo.Timeout = 2000; /* msec */
 WeMo.SearchTimeout = 5000; /* msec */
 WeMo.ST = 'urn:Belkin:service:basicevent:1';
 
@@ -88,7 +89,7 @@ WeMo.prototype = {
 			});
 		});
 		req.on('socket', function(socket) {
-			socket.setTimeout(WeMo.timeout);
+			socket.setTimeout(WeMo.Timeout);
 			socket.on('timeout', function() {
 				req.abort();
 				callback('Timeout access to WeMo@' + options.host + ':' + options.port, null);
